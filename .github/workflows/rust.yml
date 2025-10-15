@@ -28,9 +28,9 @@ jobs:
       - name: Cache Cargo
         uses: Swatinem/rust-cache@v2
       - name: Build (release)
-        run: cargo build --release --verbose
+        run: cargo build --release --verbose --features rustls-tls
       - name: Test (release)
-        run: cargo test --release --verbose
+        run: cargo test --release --verbose --features rustls-tls
 
   build-artifacts:
     name: Build release artifacts (matrix)
@@ -47,7 +47,7 @@ jobs:
       - name: Cache Cargo
         uses: Swatinem/rust-cache@v2
       - name: Build (release)
-        run: cargo build --release --verbose
+        run: cargo build --release --verbose --features rustls-tls
       - name: Prepare artifact (Windows)
         if: ${{ runner.os == 'Windows' }}
         shell: pwsh
