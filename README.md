@@ -28,7 +28,21 @@ timeout_seconds = 300
 - CLI global overrides (highest precedence):
   - `--base-url`, `--api-key`, `--config-file`, `--format <text|json>`, `--verbose`, `--quiet`
 
-Precedence: CLI overrides > config file > environment variables.
+Precedence: CLI overrides > environment variables > config file.
+
+## Building on macOS/Linux
+- Install Rust via rustup:
+  - macOS/Linux: `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh`
+  - Verify: `rustc -V` and `cargo -V`
+- Build the binary:
+  - `cargo build --release`
+- Binary path:
+  - macOS/Linux: `./target/release/appian-deployment-cli`
+  - Windows: `target\release\appian-deployment-cli.exe`
+- TLS backend:
+  - Default uses Rustls (`--features rustls-tls` implied).
+  - To use native platform TLS: `cargo build --release --features native-tls`
+- Run examples below using your platform’s binary name. Where you see `.exe` for Windows, use `./appian-deployment-cli` on macOS/Linux.
 
 ## Command Reference
 Global options apply to all commands: `--config-file`, `--base-url`, `--api-key`, `--format <text|json>`, `--verbose`, `--quiet`.
@@ -39,7 +53,11 @@ List packages for one or more applications.
   - `--app-uuid <UUID>` (repeatable)
 - Example:
 ```powershell
-./appian-deployment-cli.exe get-packages --app-uuid 11111111-1111-1111-1111-111111111111 --app-uuid 22222222-2222-2222-2222-222222222222 --format json
+./appian-deployment-cli.exe get-packages --app-uuid 11111111-1111-1111-1111-111111111111 --app-uuid 22222222-2222-2222-2222-222222222222 --base-url https://mysite.appiancloud.com --api-key $env:APPIAN_API_KEY --format json
+```
+
+```bash
+./appian-deployment-cli get-packages --app-uuid 11111111-1111-1111-1111-111111111111 --app-uuid 22222222-2222-2222-2222-222222222222 --base-url https://mysite.appiancloud.com --api-key "$APPIAN_API_KEY" --format json
 ```
 
 ### export
@@ -56,13 +74,24 @@ Export applications or a single package to an artifact zip.
 - Examples:
 ```powershell
 # Package export (exactly one UUID)
-./appian-deployment-cli.exe export --uuids 11111111-1111-1111-1111-111111111111 --export-type package --name "Sample Export" --description "Testing" --format json
+./appian-deployment-cli.exe export --uuids 11111111-1111-1111-1111-111111111111 --export-type package --name "Sample Export" --description "Testing" --base-url https://mysite.appiancloud.com --api-key $env:APPIAN_API_KEY --format json
 
 # Application export (multiple UUIDs)
-./appian-deployment-cli.exe export --uuids 11111111-1111-1111-1111-111111111111,22222222-2222-2222-2222-222222222222 --export-type application --name "My App Export" --format json
+./appian-deployment-cli.exe export --uuids 11111111-1111-1111-1111-111111111111,22222222-2222-2222-2222-222222222222 --export-type application --name "My App Export" --base-url https://mysite.appiancloud.com --api-key $env:APPIAN_API_KEY --format json
 
 # Validate only
-./appian-deployment-cli.exe export --uuids 11111111-1111-1111-1111-111111111111 --export-type package --dry-run
+./appian-deployment-cli.exe export --uuids 11111111-1111-1111-1111-111111111111 --export-type package --base-url https://mysite.appiancloud.com --api-key $env:APPIAN_API_KEY --dry-run
+```
+
+```bash
+# Package export (exactly one UUID)
+./appian-deployment-cli export --uuids 11111111-1111-1111-1111-111111111111 --export-type package --name "Sample Export" --description "Testing" --base-url https://mysite.appiancloud.com --api-key "$APPIAN_API_KEY" --format json
+
+# Application export (multiple UUIDs)
+./appian-deployment-cli export --uuids 11111111-1111-1111-1111-111111111111,22222222-2222-2222-2222-222222222222 --export-type application --name "My App Export" --base-url https://mysite.appiancloud.com --api-key "$APPIAN_API_KEY" --format json
+
+# Validate only
+./appian-deployment-cli export --uuids 11111111-1111-1111-1111-111111111111 --export-type package --base-url https://mysite.appiancloud.com --api-key "$APPIAN_API_KEY" --dry-run
 ```
 
 ### inspect
@@ -73,7 +102,11 @@ Submit a package for inspection (pre-deployment checks).
   - `--admin-console-file <PATH>` (.zip, optional)
 - Example:
 ```powershell
-./appian-deployment-cli.exe inspect --package-zip-name .\artifacts\my_package.zip --format json
+./appian-deployment-cli.exe inspect --package-zip-name .\artifacts\my_package.zip --base-url https://mysite.appiancloud.com --api-key $env:APPIAN_API_KEY --format json
+```
+
+```bash
+./appian-deployment-cli inspect --package-zip-name ./artifacts/my_package.zip --base-url https://mysite.appiancloud.com --api-key "$APPIAN_API_KEY" --format json
 ```
 
 ### get-inspection
@@ -82,7 +115,11 @@ Retrieve inspection results by inspection UUID.
   - `--uuid <UUID>` (required)
 - Example:
 ```powershell
-./appian-deployment-cli.exe get-inspection --uuid 00000000-0000-0000-0000-000000000000 --format json
+./appian-deployment-cli.exe get-inspection --uuid 00000000-0000-0000-0000-000000000000 --base-url https://mysite.appiancloud.com --api-key $env:APPIAN_API_KEY --format json
+```
+
+```bash
+./appian-deployment-cli get-inspection --uuid 00000000-0000-0000-0000-000000000000 --base-url https://mysite.appiancloud.com --api-key "$APPIAN_API_KEY" --format json
 ```
 
 ### deploy
@@ -101,10 +138,18 @@ Deploy an exported package to a target environment.
 - Examples:
 ```powershell
 # Dry run to validate inputs
-./appian-deployment-cli.exe deploy --package-zip-name .\artifacts\my_package.zip --name "My Deploy" --description "Testing" --rollback-on-failure --dry-run
+./appian-deployment-cli.exe deploy --package-zip-name .\artifacts\my_package.zip --name "My Deploy" --description "Testing" --rollback-on-failure --base-url https://mysite.appiancloud.com --api-key $env:APPIAN_API_KEY --dry-run
 
 # Real deployment with optional files
-./appian-deployment-cli.exe deploy --package-zip-name .\artifacts\my_package.zip --name "My Deploy" --customization-file .\configs\import.properties --admin-console-file .\configs\admin.zip --plugins-file .\plugins\plugins.zip --database-scripts .\db\scripts\01_schema.sql,.\db\scripts\02_seed.sql --format json
+./appian-deployment-cli.exe deploy --package-zip-name .\artifacts\my_package.zip --name "My Deploy" --customization-file .\configs\import.properties --admin-console-file .\configs\admin.zip --plugins-file .\plugins\plugins.zip --database-scripts .\db\scripts\01_schema.sql,.\db\scripts\02_seed.sql --base-url https://mysite.appiancloud.com --api-key $env:APPIAN_API_KEY --format json
+```
+
+```bash
+# Dry run to validate inputs
+./appian-deployment-cli deploy --package-zip-name ./artifacts/my_package.zip --name "My Deploy" --description "Testing" --rollback-on-failure --base-url https://mysite.appiancloud.com --api-key "$APPIAN_API_KEY" --dry-run
+
+# Real deployment with optional files
+./appian-deployment-cli deploy --package-zip-name ./artifacts/my_package.zip --name "My Deploy" --customization-file ./configs/import.properties --admin-console-file ./configs/admin.zip --plugins-file ./plugins/plugins.zip --database-scripts ./db/scripts/01_schema.sql,./db/scripts/02_seed.sql --base-url https://mysite.appiancloud.com --api-key "$APPIAN_API_KEY" --format json
 ```
 
 ### status (alias: get-deployment)
@@ -114,7 +159,11 @@ Check status of a deployment or export.
   - `--kind <export|deployment>` (optional; default `deployment`)
 - Example:
 ```powershell
-./appian-deployment-cli.exe status --deployment-uuid 00000000-0000-0000-0000-000000000000 --format json
+./appian-deployment-cli.exe status --deployment-uuid 00000000-0000-0000-0000-000000000000 --base-url https://mysite.appiancloud.com --api-key $env:APPIAN_API_KEY --format json
+```
+
+```bash
+./appian-deployment-cli status --deployment-uuid 00000000-0000-0000-0000-000000000000 --base-url https://mysite.appiancloud.com --api-key "$APPIAN_API_KEY" --format json
 ```
 
 ### results (alias: get-deployment-results)
@@ -124,7 +173,11 @@ Retrieve deployment results; optionally poll until terminal status.
   - `--poll` (optional; waits until terminal status)
 - Example:
 ```powershell
-./appian-deployment-cli.exe results --deployment-uuid 00000000-0000-0000-0000-000000000000 --poll --format json
+./appian-deployment-cli.exe results --deployment-uuid 00000000-0000-0000-0000-000000000000 --poll --base-url https://mysite.appiancloud.com --api-key $env:APPIAN_API_KEY --format json
+```
+
+```bash
+./appian-deployment-cli results --deployment-uuid 00000000-0000-0000-0000-000000000000 --poll --base-url https://mysite.appiancloud.com --api-key "$APPIAN_API_KEY" --format json
 ```
 
 ### monitor
@@ -136,7 +189,11 @@ Poll status at an interval until completion (export or deployment).
   - `--timeout-seconds <INT>` (optional; default `3600` via code)
 - Example:
 ```powershell
-./appian-deployment-cli.exe monitor --deployment-uuid 00000000-0000-0000-0000-000000000000 --interval-seconds 15 --timeout-seconds 600
+./appian-deployment-cli.exe monitor --deployment-uuid 00000000-0000-0000-0000-000000000000 --interval-seconds 15 --timeout-seconds 600 --base-url https://mysite.appiancloud.com --api-key $env:APPIAN_API_KEY
+```
+
+```bash
+./appian-deployment-cli monitor --deployment-uuid 00000000-0000-0000-0000-000000000000 --interval-seconds 15 --timeout-seconds 600 --base-url https://mysite.appiancloud.com --api-key "$APPIAN_API_KEY"
 ```
 
 ### download-package
@@ -147,7 +204,11 @@ Download an exported artifact by UUID.
   - `--overwrite` (optional)
 - Example:
 ```powershell
-./appian-deployment-cli.exe download-package --deployment-uuid 00000000-0000-0000-0000-000000000000 --output .\artifacts\export.zip --overwrite
+./appian-deployment-cli.exe download-package --deployment-uuid 00000000-0000-0000-0000-000000000000 --output .\artifacts\export.zip --overwrite --base-url https://mysite.appiancloud.com --api-key $env:APPIAN_API_KEY
+```
+
+```bash
+./appian-deployment-cli download-package --deployment-uuid 00000000-0000-0000-0000-000000000000 --output ./artifacts/export.zip --overwrite --base-url https://mysite.appiancloud.com --api-key "$APPIAN_API_KEY"
 ```
 
 ### logs (feature-gated)
@@ -158,7 +219,11 @@ Retrieve deployment logs; stream with `--follow`.
   - `--tail <INT>` (optional; last N lines)
 - Example:
 ```powershell
-./appian-deployment-cli.exe logs --deployment-uuid 00000000-0000-0000-0000-000000000000 --tail 100
+./appian-deployment-cli.exe logs --deployment-uuid 00000000-0000-0000-0000-000000000000 --tail 100 --base-url https://mysite.appiancloud.com --api-key $env:APPIAN_API_KEY
+```
+
+```bash
+./appian-deployment-cli logs --deployment-uuid 00000000-0000-0000-0000-000000000000 --tail 100 --base-url https://mysite.appiancloud.com --api-key "$APPIAN_API_KEY"
 ```
 
 ## Output Notes
