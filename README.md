@@ -1,13 +1,25 @@
 # Appian Deployment CLI (Binary + Source)
 
-A Windows-friendly command-line tool to automate Appian deployments via the Appian Deployment REST API v2.
+Cross-platform Rust CLI for Appian Deployment REST API v2. Automates export, inspect, deploy, monitor, download, and logs for Appian packages and applications. Built for DevOps and CI/CD on Windows, macOS, and Linux.
 This repository intentionally includes only:
 
 - `src/`  the Rust source code
 - `appian-deployment-cli.exe`  the prebuilt Windows x86_64 binary
 
 Everything else (docs, tests, manifests) is omitted to keep distribution minimal.
-Use the binary directly, or adapt the source in your own workspace.
+Use the binary directly, or adapt the source in your own workspace. Works on Windows, macOS, and Linux.
+
+## Table of Contents
+- Overview
+- Configuration
+- Building on macOS/Linux
+- Command Reference
+- Output Notes
+- Why CI/CD & DevOps Friendly (Windows, macOS, Linux)
+- Pipeline Examples
+- Security & Best Practices
+- Support
+
 
 ## Configuration
 - Config file: place `appian-config.toml` next to the binary.
@@ -43,6 +55,15 @@ Precedence: CLI overrides > environment variables > config file.
   - Default uses Rustls (`--features rustls-tls` implied).
   - To use native platform TLS: `cargo build --release --features native-tls`
 - Run examples below using your platform’s binary name. Where you see `.exe` for Windows, use `./appian-deployment-cli` on macOS/Linux.
+
+## Features
+- Appian Deployment REST API v2 integration (export, inspect, deploy, status, results)
+- Cross-platform binaries for Windows, macOS, and Linux
+- CI/CD ready with JSON output and non-interactive flags
+- Config precedence: CLI > environment variables > config file
+- TLS via Rustls by default; opt-in native TLS when needed
+- Clear logs and streaming `--follow` support
+
 
 ## Command Reference
 Global options apply to all commands: `--config-file`, `--base-url`, `--api-key`, `--format <text|json>`, `--verbose`, `--quiet`.
@@ -300,3 +321,11 @@ steps:
 ## Support
 Open an issue or adapt the source to your needs.
 For Appian API details, consult the Appian Deployment REST API v2 documentation.
+
+## Keywords & Topics
+- Appian Deployment REST API v2 CLI
+- Appian export, inspect, deploy, status, results, monitor, logs
+- Appian packages, application zip, artifact download
+- DevOps automation, CI/CD pipelines, GitHub Actions, Azure DevOps, GitLab CI, Jenkins
+- Cross-platform CLI: Windows, macOS, Linux
+- Rust CLI, reqwest, rustls, native-tls
