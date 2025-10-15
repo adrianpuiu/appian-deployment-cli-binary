@@ -20,7 +20,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest, ubuntu-latest]
+        os: [windows-latest, ubuntu-latest, macos-latest]
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
@@ -31,6 +31,8 @@ jobs:
         run: cargo check --release --features rustls-tls --lib --bins
       - name: Build (release)
         run: cargo build --release --features rustls-tls
+      - name: Smoke test: print help and exit
+        run: cargo run --release --features rustls-tls -- --help
 
   build-artifacts:
     name: Build release artifacts (windows)
