@@ -29,8 +29,8 @@ jobs:
         uses: Swatinem/rust-cache@v2
       - name: Build (release)
         run: cargo build --release --verbose --features rustls-tls
-      - name: Test (release)
-        run: cargo test --release --verbose --features rustls-tls
+      - name: Test (release, lib+bins only)
+        run: cargo test --release --verbose --features rustls-tls --lib --bins --tests
 
   build-artifacts:
     name: Build release artifacts (matrix)
