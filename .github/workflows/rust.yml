@@ -37,7 +37,8 @@ jobs:
   build-artifacts:
     name: Build release artifacts (windows)
     needs: build-and-test
-    if: startsWith(github.ref, 'refs/tags/')
+    # Run on pushes to main or tags; keep publish gated to tags
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/'))
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
