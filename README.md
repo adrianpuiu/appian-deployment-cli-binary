@@ -230,35 +230,68 @@ Retrieve deployment logs; stream with `--follow`.
 - `--format json` returns structured JSON for server-backed operations; `--dry-run` prints validation text.
 - Non-zero exit codes indicate validation or runtime errors.
 
-## Why CI/CD & DevOps Friendly
-- Single binary on Windows runners; no runtime or installer dependencies.
-- Predictable configuration via `appian-config.toml` and environment overrides; secret-friendly.
-- Machine-readable outputs with `--format json` for reliable parsing in pipelines.
-- `--dry-run` validation to fail fast before touching remote systems.
-- Clear non-zero exit on errors; easy to gate steps, notify, and roll back.
-- Optional features (e.g., `logs`) gated at build time to keep footprint minimal.
-- Works on GitHub Actions, Azure DevOps, GitLab CI, and self-hosted Windows agents.
+## Why CI/CD & DevOps Friendly (Windows, macOS, Linux)
+- Cross-platform single binary per OS; no runtime installers required.
+  - Windows: `appian-deployment-cli.exe`
+  - macOS/Linux: `appian-deployment-cli`
+- Predictable configuration with clear precedence: CLI overrides > environment variables > config file.
+- Secret-friendly: use runner secrets and env vars; avoid printing tokens; prefer `--api-key` via env when possible.
+- Machine-readable outputs with `--format json` enable robust parsing and gating.
+- `--dry-run` validates inputs and fails fast without calling remote APIs.
+- Non-zero exit codes map cleanly to pipeline fail/continue strategies.
+- Optional features (e.g., `logs`) can be feature-gated at build time to minimize footprint.
+- Integrates cleanly with GitHub Actions, Azure DevOps, GitLab CI, Jenkins, and self-hosted agents across Windows/macOS/Linux.
 
-### Pipeline Examples
-- GitHub Actions (Windows):
+### Pipeline Examples (Cross-Platform)
+- GitHub Actions matrix across Windows/macOS/Linux:
 ```yaml
-- name: Export Package (dry run)
-  run: .\\appian-deployment-cli.exe export --uuids $env:UUIDS --export-type package --name "$env:NAME" --description "$env:DESC" --dry-run --format json
+jobs:
+  deploy:
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set environment
+        env:
+          APPIAN_BASE_URL: https://mysite.appiancloud.com
+          APPIAN_API_KEY: ${{ secrets.APPIAN_API_KEY }}
+        run: echo "env set"
+      - name: Export Package (dry run)
+        shell: bash
+        run: |
+          BIN="./appian-deployment-cli"
+          if [[ "${{ matrix.os }}" == windows* ]]; then BIN="./appian-deployment-cli.exe"; fi
+          $BIN export --uuids "$UUIDS" --export-type package --name "$NAME" --description "$DESC" --dry-run --base-url "$APPIAN_BASE_URL" --api-key "$APPIAN_API_KEY" --format json
 
-- name: Deploy Package
-  run: .\\appian-deployment-cli.exe deploy --package-zip-name .\\artifacts\\my_package.zip --name "$env:NAME" --description "$env:DESC" --rollback-on-failure --format json | Out-File deploy.json
+      - name: Deploy Package
+        shell: bash
+        run: |
+          BIN="./appian-deployment-cli"
+          if [[ "${{ matrix.os }}" == windows* ]]; then BIN="./appian-deployment-cli.exe"; fi
+          $BIN deploy --package-zip-name ./artifacts/my_package.zip --name "$NAME" --description "$DESC" --rollback-on-failure --base-url "$APPIAN_BASE_URL" --api-key "$APPIAN_API_KEY" --format json > deploy.json
 ```
 
-- Azure DevOps (PowerShell):
-```powershell
-.\appian-deployment-cli.exe status --deployment-uuid $env:DEPLOYMENT_UUID --format json | Set-Content status.json
+- Azure DevOps (Windows PowerShell):
+```yaml
+steps:
+- powershell: |
+    .\appian-deployment-cli.exe status --deployment-uuid $env:DEPLOYMENT_UUID --base-url $env:APPIAN_BASE_URL --api-key $(APPIAN_API_KEY) --format json | Set-Content status.json
+  displayName: Check Deployment Status
 ```
 
-- Parsing JSON (PowerShell):
-```powershell
-$deployment = Get-Content deploy.json | ConvertFrom-Json
-if ($deployment.status -ne 'COMPLETED') { throw 'Deployment failed' }
-```
+- Parsing JSON
+  - PowerShell (Windows):
+    ```powershell
+    $deployment = Get-Content deploy.json | ConvertFrom-Json
+    if ($deployment.status -ne 'COMPLETED') { throw 'Deployment failed' }
+    ```
+  - Bash (macOS/Linux):
+    ```bash
+    status=$(jq -r '.status' deploy.json)
+    test "$status" = "COMPLETED" || { echo "Deployment failed"; exit 1; }
+    ```
 
 ## Security & Best Practices
 - Store API keys in runner secrets or environment variables; avoid committing real secrets.
