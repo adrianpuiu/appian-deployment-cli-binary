@@ -31,9 +31,10 @@ regex = "1.10"
 chrono = { version = "0.4", features = ["serde"] }
 dirs = "5.0"
 tempfile = "3.8"
+# Optional dependency used only when integration-tests feature is enabled
+wiremock = { version = "0.5", optional = true }
 
 [dev-dependencies]
-wiremock = "0.5"
 pretty_assertions = "1.4"
 tokio-test = "0.4"
 
@@ -62,7 +63,8 @@ monitor = []
 download = []
 logs = []
 native-tls = ["reqwest/native-tls"]
-integration-tests = ["wiremock"]
+# Use dep:wiremock to activate the optional dependency correctly
+integration-tests = ["dep:wiremock"]
 
 [[bin]]
 name = "appian-deployment-cli"
