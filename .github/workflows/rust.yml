@@ -16,7 +16,7 @@ env:
 
 jobs:
   build-and-test:
-    name: Build and Test (windows)
+    name: Build (windows)
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -25,9 +25,7 @@ jobs:
       - name: Cache Cargo
         uses: Swatinem/rust-cache@v2
       - name: Build (release)
-        run: cargo build --release --verbose --features rustls-tls
-      - name: Check (release, lib+bins only)
-        run: cargo check --release --verbose --features rustls-tls --lib --bins
+        run: cargo build --release --features rustls-tls
 
   build-artifacts:
     name: Build release artifacts (windows)
@@ -41,7 +39,7 @@ jobs:
       - name: Cache Cargo
         uses: Swatinem/rust-cache@v2
       - name: Build (release)
-        run: cargo build --release --verbose --features rustls-tls
+        run: cargo build --release --features rustls-tls
       - name: Prepare artifact (Windows)
         shell: pwsh
         run: |
